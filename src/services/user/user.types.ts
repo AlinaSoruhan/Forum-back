@@ -1,5 +1,4 @@
-import type { AuthInput, PublicUser } from "./types.js" // Убедитесь, что пути к вашим типам верны
-
+import type { AuthInput, PublicUser } from "./types.js" 
 export interface TokenSigner {
     signAccessToken: (userId: number) => string;
     signRefreshToken: (userId: number) => string;
