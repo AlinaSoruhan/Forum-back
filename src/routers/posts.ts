@@ -1,12 +1,14 @@
 import { Router } from "express"
 import type { PostHandler } from "../transport/handlers/posts.types.ts"
 
-export function createPostRouter(handler: PostHandler) {
-    const router = Router();
+export function createPostRouter(postController: PostHandler) {
+    const apiRouter = Router();
 
-    router.get("/posts", handler.getAllPosts)
-    router.get("/posts/:id", handler.getPostById)
-    router.post("/posts", handler.createPost)
+    apiRouter.route("/posts")
+        .get(postController.getAllPosts)
+        .post(postController.createPost);
 
-    return router;
+    apiRouter.get("/posts/:id", postController.getPostById);
+
+    return apiRouter;
 }
