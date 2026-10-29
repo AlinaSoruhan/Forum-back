@@ -1,7 +1,7 @@
 import type { Request, Response } from "express"
 
 export interface PostHandler {
-    getAllPosts: (req: Request, res: Response) => Promise<void>;
-    getPostById: (req: Request, res: Response) => Promise<void>;
-    createPost: (req: Request, res: Response) => Promise<void>;
+    getPostById(request: Request, response: Response): Promise<void>;
+    getAllPosts(request: Request, response: Response): Promise<void>;
+    createPost(request: Request, response: Response): Promise<void>;
 }

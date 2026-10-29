@@ -2,53 +2,56 @@ import type { Request, Response } from "express";
 import type { PostService } from "../../domain/post/post.types.js";
 import type { PostHandler } from "./posts.types.js";
 
-export function createPostHandler(service: PostService): PostHandler {
+export function createPostHandler(postService: PostService): PostHandler {
 
-    async function getAllPosts(req: Request, res: Response) {
-        const posts = await service.getPosts();
-        res.status(200).json(posts);
+    async function getAllPosts(_request: Request, response: Response) {
+        const data = await postService.getPosts();
+        response.status(200).json(data);
     }
 
-    async function getPostById(req: Request, res: Response) {
-        const id = Number(req.params.id);
-        if (!Number.isInteger(id) || id <= 0) {
-            res.status(400).json({
-                message: "INVALID_POST_ID"
-            });
+    async function getPostById(request: Request, response: Response) {
+        const postId = parseInt(request.params.id, 10);
+        
+        if (isNaN(postId) || postId <= 0) {
+            response.status(400).json({ error: "INVALID_POST_ID" });
             return;
         }
 
-        const post = await service.getPost(id);
-        if (!post) {
-            res.status(404).json({
-                message: "POST_NOT_FOUND"
-            });
+        const item = await postService.getPost(postId);
+        if (!item) {
+            response.status(404).json({ error: "POST_NOT_FOUND" });
             return;
         }
 
-        res.status(200).json(post);
+        response.status(200).json(item);
     }
 
-    async function createPost(req: Request, res: Response) {
-        const { title, content } = req.body ?? {};
+    async function createPost(request: Request, response: Response) {
+        const body = request.body || {};
+        const titleText = body.title;
+        const contentText = body.content;
 
-        if (typeof title !== "string" || title.trim().length === 0) {
-            res.status(422).json({
-                message: "TITLE_IS_REQUIRED"
-            });
+        if (!titleText || typeof titleText !== "string" || !titleText.trim()) {
+            response.status(422).json({ error: "TITLE_IS_REQUIRED" });
             return;
         }
 
-        if (content !== undefined && content !== null && typeof content !== "string") {
-            res.status(422).json({
-                message: "CONTENT_MUST_BE_A_STRING"
-            });
+        if (contentText && typeof contentText !== "string") {
+            response.status(422).json({ error: "CONTENT_MUST_BE_A_STRING" });
             return;
         }
 
-        const post = await service.createPost({ title, content: content ?? null });
-        res.status(201).json(post);
+        const createdArticle = await postService.createPost({ 
+            title: titleText, 
+            content: contentText ?? null 
+        });
+        
+        response.status(201).json(createdArticle);
     }
 
-    return { getAllPosts, getPostById, createPost };
+    return { 
+        getAllPosts, 
+        getPostById, 
+        createPost 
+    };
 }

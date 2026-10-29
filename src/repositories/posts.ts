@@ -1,22 +1,28 @@
 import type { db as database } from '../prisma/db.ts'
+import type { NewPostData } from './post.interface.ts'
 
-type Database = typeof database
+type Storage = typeof database;
 
-export function createPostRepository(db: Database) {
-    async function getAllPosts() {
-        return await db.orm.public.Post.orderBy((post) => post.id.asc()).all();
-    }
+export function createPostRepository(db: Storage) {
+    const findAll = async () => {
+        return db.orm.public.Post.orderBy(item => item.id.asc()).all();
+    };
 
-    async function findPostById(id: number) {
-        return await db.orm.public.Post.where({ id }).first();
-    }
+    const findById = async (postId: number) => {
+        return db.orm.public.Post.where({ id: postId }).first();
+    };
 
-    async function createPost(data: { title: string; content: string | null }) {
-        return await db.orm.public.Post.create({
-            title: data.title,
-            content: data.content,
+    const insert = async (payload: NewPostData) => {
+        const { title, content } = payload;
+        return db.orm.public.Post.create({
+            title,
+            content: content ?? null,
         });
-    }
+    };
 
-    return { getAllPosts, findPostById, createPost };
+    return { 
+        findAll, 
+        findById, 
+        insert 
+    };
 }
